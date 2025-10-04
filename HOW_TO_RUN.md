@@ -53,7 +53,7 @@ Start the Next.js development server:
 npx next dev
 ```
 
-The frontend will be available at http://localhost:3000
+The frontend will be available at http://localhost:3000 (or http://localhost:3001 if port 3000 is in use)
 
 If you encounter compatibility issues with Next.js, try installing a specific version:
 ```bash
@@ -61,6 +61,28 @@ npm uninstall next
 npm install next@14.2.3 react@18.2.0 react-dom@18.2.0
 npx next dev
 ```
+
+If you encounter Tailwind CSS issues, try reinstalling the correct versions:
+```bash
+npm uninstall tailwindcss postcss autoprefixer
+npm install -D tailwindcss@3.4.1 postcss@8.4.31 autoprefixer@10.4.16
+npx tailwindcss init -p
+npx next dev
+```
+
+#### Option B: Static HTML Version
+
+Open a new terminal/command prompt and navigate to the main project directory:
+```bash
+cd "C:\Users\shubh\OneDrive\Desktop\video downloader"
+```
+
+Start the Python server:
+```bash
+python -m http.server 8080
+```
+
+The frontend will be available at http://localhost:8080
 
 #### Option B: Static HTML Version
 
@@ -138,7 +160,30 @@ You can also test the backend API directly by visiting:
      npx next dev
      ```
 
-7. **Compatibility Issues**
+7. **Tailwind CSS Issues**
+   - If you encounter Tailwind CSS errors, reinstall the correct versions:
+     ```bash
+     npm uninstall tailwindcss postcss autoprefixer
+     npm install -D tailwindcss@3.4.1 postcss@8.4.31 autoprefixer@10.4.16
+     npx tailwindcss init -p
+     npx next dev
+     ```
+   - Make sure the PostCSS configuration is correct:
+     ```js
+     module.exports = {
+       plugins: {
+         'tailwindcss': {},
+         'autoprefixer': {},
+       },
+     }
+     ```
+
+8. **Port Conflicts**
+   - Next.js will automatically try different ports if the default is in use
+   - The server will show which port it's running on in the console output
+   - You can specify a port manually: `npx next dev -p 3002`
+
+9. **Compatibility Issues**
    - If you continue to have issues, use the static HTML version which has no build requirements
    - Navigate to the project directory and run:
      ```bash
