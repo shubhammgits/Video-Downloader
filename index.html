@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoDownloader - Download Videos in Seconds</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .dark .glass {
+            background: rgba(30, 30, 30, 0.3);
+        }
+        
+        .animate-pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
+    <!-- Header -->
+    <header class="py-6 px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">VD</span>
+                </div>
+                <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
+                    VideoDownloader
+                </h1>
+            </div>
+            
+            <button id="theme-toggle" class="p-2 rounded-full bg-white dark:bg-gray-700 shadow-lg hover:shadow-xl transition-all duration-300" aria-label="Toggle dark mode">
+                <i id="theme-icon" class="fas fa-moon text-gray-700 dark:text-yellow-400 text-xl"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
+                Download Videos in Seconds
+            </h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                Paste any video link from YouTube, Instagram, Facebook, TikTok, or Twitter and download in one click. No ads, no redirects.
+            </p>
+        </div>
+
+        <!-- URL Input Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mb-8 glass border border-gray-200 dark:border-gray-700">
+            <form id="download-form" class="space-y-4">
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <div class="flex-grow relative">
+                        <input
+                            type="text"
+                            id="video-url"
+                            placeholder="Paste video link here..."
+                            class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-300"
+                        />
+                        <button
+                            type="button"
+                            id="paste-btn"
+                            class="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 rounded-md text-sm font-medium transition-colors duration-300"
+                        >
+                            Paste
+                        </button>
+                    </div>
+                    <button
+                        type="submit"
+                        id="download-btn"
+                        class="px-6 py-3 rounded-lg font-medium transition-all duration-300 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Download
+                    </button>
+                </div>
+                
+                <div id="platform-info" class="flex items-center text-sm text-gray-600 dark:text-gray-300 mt-2 hidden">
+                    <span class="mr-2">Detected:</span>
+                    <span id="platform-name" class="capitalize font-medium"></span>
+                </div>
+            </form>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 glass border border-gray-200 dark:border-gray-700 hidden">
+            <div class="flex flex-col items-center justify-center py-8">
+                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-4"></div>
+                <p class="text-gray-600 dark:text-gray-300">Analyzing video...</p>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error-message" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4 mb-8 hidden">
+            <div class="flex items-center text-red-600 dark:text-red-400">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <span id="error-text"></span>
+            </div>
+        </div>
+
+        <!-- Video Preview -->
+        <div id="video-preview" class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden glass border border-gray-200 dark:border-gray-700 hidden">
+            <div class="p-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Video Preview</h2>
+                
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="md:w-1/2">
+                        <div class="relative rounded-xl overflow-hidden">
+                            <img 
+                                id="video-thumbnail"
+                                alt="Video thumbnail" 
+                                class="w-full h-auto object-cover"
+                            />
+                            <div class="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-sm px-2 py-1 rounded">
+                                <span id="video-duration"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="md:w-1/2">
+                        <h3 id="video-title" class="text-xl font-semibold text-gray-900 dark:text-white mb-2"></h3>
+                        
+                        <div class="mt-6">
+                            <h4 class="font-medium text-gray-900 dark:text-white mb-3">Download Options</h4>
+                            <div id="download-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <!-- Download options will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Supported Platforms -->
+        <div id="supported-platforms" class="mt-16">
+            <h2 class="text-2xl font-bold text-center text-gray-900 dark:text-white mb-8">Supported Platforms</h2>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div class="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 glass">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center mb-2">
+                        <i class="fab fa-youtube text-white"></i>
+                    </div>
+                    <span class="text-gray-700 dark:text-gray-300 font-medium">YouTube</span>
+                </div>
+                <div class="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 glass">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center mb-2">
+                        <i class="fab fa-instagram text-white"></i>
+                    </div>
+                    <span class="text-gray-700 dark:text-gray-300 font-medium">Instagram</span>
+                </div>
+                <div class="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 glass">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center mb-2">
+                        <i class="fab fa-facebook text-white"></i>
+                    </div>
+                    <span class="text-gray-700 dark:text-gray-300 font-medium">Facebook</span>
+                </div>
+                <div class="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 glass">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center mb-2">
+                        <i class="fab fa-tiktok text-white"></i>
+                    </div>
+                    <span class="text-gray-700 dark:text-gray-300 font-medium">TikTok</span>
+                </div>
+                <div class="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 glass">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center mb-2">
+                        <i class="fab fa-twitter text-white"></i>
+                    </div>
+                    <span class="text-gray-700 dark:text-gray-300 font-medium">Twitter</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="py-8 px-4 text-center text-gray-600 dark:text-gray-400">
+        <p>© <span id="current-year"></span> VideoDownloader. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const videoUrlInput = document.getElementById('video-url');
+        const pasteBtn = document.getElementById('paste-btn');
+        const downloadForm = document.getElementById('download-form');
+        const platformInfo = document.getElementById('platform-info');
+        const platformName = document.getElementById('platform-name');
+        const loadingState = document.getElementById('loading-state');
+        const errorMessage = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+        const videoPreview = document.getElementById('video-preview');
+        const videoThumbnail = document.getElementById('video-thumbnail');
+        const videoDuration = document.getElementById('video-duration');
+        const videoTitle = document.getElementById('video-title');
+        const downloadOptions = document.getElementById('download-options');
+        const supportedPlatforms = document.getElementById('supported-platforms');
+        const currentYear = document.getElementById('current-year');
+        
+        // Set current year
+        currentYear.textContent = new Date().getFullYear();
+        
+        // Theme toggle
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            themeIcon.className = isDark ? 'fas fa-sun text-yellow-400 text-xl' : 'fas fa-moon text-gray-700 text-xl';
+        }
+        
+        // Check for saved theme preference or respect OS setting
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+            
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                themeIcon.className = 'fas fa-sun text-yellow-400 text-xl';
+            } else {
+                themeIcon.className = 'fas fa-moon text-gray-700 text-xl';
+            }
+        }
+        
+        // Detect platform from URL
+        function detectPlatform(url) {
+            if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
+            if (url.includes('instagram.com')) return 'instagram';
+            if (url.includes('facebook.com') || url.includes('fb.com')) return 'facebook';
+            if (url.includes('tiktok.com')) return 'tiktok';
+            if (url.includes('twitter.com') || url.includes('x.com')) return 'twitter';
+            return 'unknown';
+        }
+        
+        // Auto-paste from clipboard
+        async function handlePaste() {
+            try {
+                const text = await navigator.clipboard.readText();
+                videoUrlInput.value = text;
+                updatePlatformInfo(text);
+            } catch (err) {
+                console.error('Failed to read clipboard contents: ', err);
+            }
+        }
+        
+        // Update platform info display
+        function updatePlatformInfo(url) {
+            const platform = detectPlatform(url);
+            if (platform !== 'unknown' && url) {
+                platformName.textContent = platform;
+                platformInfo.classList.remove('hidden');
+            } else {
+                platformInfo.classList.add('hidden');
+            }
+        }
+        
+        // Show error message
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.remove('hidden');
+            setTimeout(() => {
+                errorMessage.classList.add('hidden');
+            }, 5000);
+        }
+        
+        // Handle form submission
+        async function handleSubmit(e) {
+            e.preventDefault();
+            const url = videoUrlInput.value.trim();
+            
+            if (!url) {
+                showError('Please enter a video URL');
+                return;
+            }
+            
+            // Show loading state
+            loadingState.classList.remove('hidden');
+            videoPreview.classList.add('hidden');
+            supportedPlatforms.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+            
+            try {
+                // In a real app, this would call your backend API
+                // For now, we'll simulate a response
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // Mock response data
+                const videoData = {
+                    title: 'Sample Video Title',
+                    thumbnail: 'https://placehold.co/600x400',
+                    duration: '3:45',
+                    formats: [
+                        { quality: '720p', format: 'mp4', size: '45MB' },
+                        { quality: '1080p', format: 'mp4', size: '85MB' },
+                        { quality: 'audio', format: 'mp3', size: '5MB' }
+                    ]
+                };
+                
+                // Display video preview
+                displayVideoPreview(videoData);
+            } catch (err) {
+                showError('Failed to fetch video information. Please check the URL and try again.');
+            } finally {
+                loadingState.classList.add('hidden');
+            }
+        }
+        
+        // Display video preview
+        function displayVideoPreview(videoData) {
+            videoThumbnail.src = videoData.thumbnail;
+            videoDuration.textContent = videoData.duration;
+            videoTitle.textContent = videoData.title;
+            
+            // Clear and populate download options
+            downloadOptions.innerHTML = '';
+            videoData.formats.forEach(format => {
+                const optionBtn = document.createElement('button');
+                optionBtn.className = 'flex flex-col items-center justify-center p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-gray-700 transition-all duration-300';
+                optionBtn.innerHTML = `
+                    <span class="font-medium text-gray-900 dark:text-white">${format.quality}</span>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">${format.format}</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">${format.size}</span>
+                `;
+                optionBtn.addEventListener('click', () => handleDownload(format.quality));
+                downloadOptions.appendChild(optionBtn);
+            });
+            
+            videoPreview.classList.remove('hidden');
+        }
+        
+        // Handle download
+        function handleDownload(format) {
+            // In a real app, this would trigger the actual download
+            alert(`Downloading in ${format} format!`);
+        }
+        
+        // Event Listeners
+        themeToggle.addEventListener('click', toggleTheme);
+        pasteBtn.addEventListener('click', handlePaste);
+        downloadForm.addEventListener('submit', handleSubmit);
+        videoUrlInput.addEventListener('input', (e) => {
+            updatePlatformInfo(e.target.value);
+        });
+        
+        // Initialize
+        initTheme();
+    </script>
+</body>
+</html>
