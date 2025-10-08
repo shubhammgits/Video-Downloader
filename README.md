@@ -15,8 +15,12 @@ A modern, high-performance video downloader web application for platforms like Y
 ## Tech Stack
 
 ### Frontend
+<<<<<<< Updated upstream
 - Next.js 14 (App Router)
 - React 18
+=======
+- React
+>>>>>>> Stashed changes
 - TypeScript
 - TailwindCSS
 
