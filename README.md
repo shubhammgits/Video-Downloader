@@ -1,6 +1,6 @@
 # VideoDownloader
 
-A modern, high-performance video downloader web application for platforms like YouTube, Instagram, Facebook, TikTok, and Twitter.
+A modern, high-performance video downloader web application for platforms like YouTube, Instagram, Facebook, and Twitter.
 
 ## Features
 
